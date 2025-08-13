@@ -28,29 +28,44 @@ After running Step 2 on all VMs, you should have:
 - VM3 Address: `0x...`
 - VM4 Address: `0x...`
 
-## Step 4: Initialize Genesis (Run on Each VM)
+## Step 4: Initialize Genesis (VM1 Only)
 
-**VM1:**
+**On VM1 only:**
 ```bash
 ./init-blockchain.sh <VM2_ADDRESS> <VM3_ADDRESS> <VM4_ADDRESS>
 ```
 
-**VM2:**
+## Step 5: Copy Genesis to Other VMs
+
+**Option A - Using SCP (if you have SSH access):**
 ```bash
-./init-blockchain.sh <VM1_ADDRESS> <VM3_ADDRESS> <VM4_ADDRESS>
+# From VM1, copy to other VMs
+scp DVRE-Node/genesis.json user@VM2_IP:~/besu/DVRE-Node/
+scp DVRE-Node/genesis.json user@VM3_IP:~/besu/DVRE-Node/
+scp DVRE-Node/genesis.json user@VM4_IP:~/besu/DVRE-Node/
 ```
 
-**VM3:**
+**Option B - Manual copy via terminal:**
 ```bash
-./init-blockchain.sh <VM1_ADDRESS> <VM2_ADDRESS> <VM4_ADDRESS>
+# On VM1, display the genesis file content
+cat DVRE-Node/genesis.json
+
+# Then on VM2, VM3, VM4, create the file:
+mkdir -p DVRE-Node
+cat > DVRE-Node/genesis.json << 'EOF'
+# Paste the content from VM1 here
+EOF
 ```
 
-**VM4:**
+**Option C - Using shared storage (if available):**
 ```bash
-./init-blockchain.sh <VM1_ADDRESS> <VM2_ADDRESS> <VM3_ADDRESS>
+# If VMs have shared network storage
+cp DVRE-Node/genesis.json /shared/path/
+# Then on other VMs:
+cp /shared/path/genesis.json DVRE-Node/
 ```
 
-## Step 5: Start Bootstrap Node (VM1 Only)
+## Step 6: Start Bootstrap Node (VM1 Only)
 
 ```bash
 ./start-first-node.sh
@@ -59,7 +74,7 @@ After running Step 2 on all VMs, you should have:
 **Copy the enode output** - looks like:
 `enode://abc123...@IP:30310`
 
-## Step 6: Start Other Nodes (VM2, VM3, VM4)
+## Step 7: Start Other Nodes (VM2, VM3, VM4)
 
 **VM2:**
 ```bash
