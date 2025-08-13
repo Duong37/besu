@@ -100,4 +100,4 @@ echo "WebSocket endpoint will be available at: ws://$PUBLIC_IP:8546"
 echo ""
 echo "Press Ctrl+C to stop the node"
 
-docker compose up
+docker compose up -d
