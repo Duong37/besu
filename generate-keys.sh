@@ -5,9 +5,19 @@ set -e
 
 echo "Generating node keys using Docker..."
 
+# Clean up any existing data and create fresh directory
+rm -rf DVRE-Node/data
 mkdir -p DVRE-Node/data
 
 # Generate the node key pair using Docker
+# First generate the private key, then export the public key
+echo "Generating private key..."
+docker run --rm \
+    -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
+    hyperledger/besu:latest \
+    --data-path=/opt/besu/data public-key generate
+
+echo "Exporting public key..."
 docker run --rm \
     -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
     hyperledger/besu:latest \
