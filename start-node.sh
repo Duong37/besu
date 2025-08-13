@@ -75,11 +75,11 @@ services:
       --p2p-host=$PUBLIC_IP
       --rpc-http-host=0.0.0.0
       --rpc-http-enabled
-      --rpc-http-api=ETH,NET,IBFT
+      --rpc-http-api=ETH,NET,IBFT,ADMIN
       --rpc-ws-enabled
       --rpc-ws-host=0.0.0.0
       --rpc-ws-port=8546
-      --rpc-ws-api=ETH,NET,WEB3
+      --rpc-ws-api=ETH,NET,WEB3,ADMIN
       --host-allowlist="*"
       --rpc-http-cors-origins="all"
       --profile=ENTERPRISE
