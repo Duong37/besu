@@ -9,26 +9,29 @@ echo "Generating node keys using Docker..."
 rm -rf DVRE-Node/data
 mkdir -p DVRE-Node/data
 
-# Generate the private key by running a simple Besu command that creates it automatically
-echo "Generating node keys..."
-docker run --rm \
-    -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
-    hyperledger/besu:latest \
-    --data-path=/opt/besu/data public-key export-address --to=/opt/besu/data/node.address
+# Generate a private key using openssl and convert to Besu format
+echo "Generating private key..."
+# Generate a 32-byte private key
+openssl rand -hex 32 > DVRE-Node/data/key
 
-# Export the public key
 echo "Exporting public key..."
 docker run --rm \
     -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
     hyperledger/besu:latest \
     --data-path=/opt/besu/data public-key export --to=/opt/besu/data/key.pub
 
+echo "Exporting node address..."
+docker run --rm \
+    -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
+    hyperledger/besu:latest \
+    --data-path=/opt/besu/data public-key export-address --to=/opt/besu/data/node.address
+
 echo "Node key pair generated and stored in DVRE-Node/data"
 
 # Get the node address
 NODE_ADDRESS=$(cat DVRE-Node/data/node.address)
 echo "Node address: $NODE_ADDRESS"
-echo "$NODE_ADDRESS" > DVRE-Node/node.address
+cp DVRE-Node/data/node.address DVRE-Node/node.address
 
 # Get public IP for enode
 PUBLIC_IP=$(curl -s https://api.ipify.org)
