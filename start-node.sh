@@ -75,11 +75,11 @@ services:
       --p2p-host=$PUBLIC_IP
       --rpc-http-host=0.0.0.0
       --rpc-http-enabled
-      --rpc-http-api=ETH,NET,IBFT,ADMIN
+      --rpc-http-api=ETH,NET,IBFT,ADMIN,DEBUG,TXPOOL,WEB3
       --rpc-ws-enabled
       --rpc-ws-host=0.0.0.0
       --rpc-ws-port=8546
-      --rpc-ws-api=ETH,NET,WEB3,ADMIN
+      --rpc-ws-api=ETH,NET,WEB3,ADMIN,DEBUG,TXPOOL
       --host-allowlist="*"
       --rpc-http-cors-origins="all"
       --profile=ENTERPRISE
@@ -94,10 +94,11 @@ echo "Stopping any existing Besu containers..."
 docker compose down 2>/dev/null || true
 
 # Start the node
-echo "Starting Besu node..."
+echo "Starting Besu node in detached mode..."
 echo "RPC endpoint will be available at: http://$PUBLIC_IP:8550"
 echo "WebSocket endpoint will be available at: ws://$PUBLIC_IP:8546"
-echo ""
-echo "Press Ctrl+C to stop the node"
 
 docker compose up -d
+
+echo "Node started successfully!"
+echo "Check status with: docker logs besu-node"
