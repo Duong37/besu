@@ -9,14 +9,14 @@ echo "Generating node keys using Docker..."
 rm -rf DVRE-Node/data
 mkdir -p DVRE-Node/data
 
-# Generate the node key pair using Docker
-# First generate the private key, then export the public key
-echo "Generating private key..."
+# Generate the private key by running a simple Besu command that creates it automatically
+echo "Generating node keys..."
 docker run --rm \
     -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
     hyperledger/besu:latest \
-    --data-path=/opt/besu/data public-key generate
+    --data-path=/opt/besu/data public-key export-address --to=/opt/besu/data/node.address
 
+# Export the public key
 echo "Exporting public key..."
 docker run --rm \
     -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
@@ -25,12 +25,8 @@ docker run --rm \
 
 echo "Node key pair generated and stored in DVRE-Node/data"
 
-# Export the node address using Docker
-NODE_ADDRESS=$(docker run --rm \
-    -v "$(pwd)/DVRE-Node/data:/opt/besu/data" \
-    hyperledger/besu:latest \
-    --data-path=/opt/besu/data public-key export-address --node-private-key-file=/opt/besu/data/key)
-
+# Get the node address
+NODE_ADDRESS=$(cat DVRE-Node/data/node.address)
 echo "Node address: $NODE_ADDRESS"
 echo "$NODE_ADDRESS" > DVRE-Node/node.address
 
