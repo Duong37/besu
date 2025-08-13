@@ -74,6 +74,10 @@ cp /shared/path/genesis.json DVRE-Node/
 **Copy the enode output** - looks like:
 `enode://abc123...@IP:30310`
 
+```bash
+echo "enode://$(cat DVRE-Node/data/key.pub)@$(curl -s https://api.ipify.org):30310"
+```
+
 ## Step 7: Start Other Nodes (VM2, VM3, VM4)
 
 **VM2:**

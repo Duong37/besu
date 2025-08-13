@@ -1,104 +1,81 @@
 #!/bin/bash
 
 # Besu Node Startup Script
-# Usage: ./start-node.sh <bootstrap_enode>
-# This script starts a non-bootstrap node and connects it to the network
-# Must run generate-keys.sh first and have the same genesis.json as other nodes
+# Usage: ./start-node.sh <enode-url>
+# Need to have run generate-keys.sh first to create the node keys
+# Also need to put genesis.json in the DVRE-Node directory
 
 set -e
 
 # Check if enode URL is provided
 if [ $# -eq 0 ]; then
-    echo "Error: No bootstrap enode URL provided"
-    echo "Usage: $0 <bootstrap_enode>"
-    echo "Example: $0 enode://abcd1234...@192.168.1.100:30310"
-    echo ""
-    echo "Get the bootstrap enode from the first node's DVRE-Node/node.enode file"
+    echo "Error: No enode URL provided"
+    echo "Usage: $0 <enode-url>"
+    echo "Example: $0 enode://abcd1234...@192.168.1.100:30303"
     exit 1
 fi
 
-BOOTSTRAP_ENODE="$1"
+ENODE_URL="$1"
 
-echo "Starting Besu node with bootstrap: $BOOTSTRAP_ENODE"
-
-# Check if genesis.json exists
-if [ ! -f "DVRE-Node/genesis.json" ]; then
-    echo "Error: genesis.json not found in DVRE-Node directory"
-    echo "Copy the genesis.json from the bootstrap node to this location"
-    exit 1
-fi
-
-# Check if node keys exist
-if [ ! -f "DVRE-Node/data/key" ]; then
-    echo "Error: Node keys not found"
-    echo "Run ./generate-keys.sh first to generate node keys"
-    exit 1
-fi
-
-# Fetch public IP
+# Fetch public IP once
 PUBLIC_IP=$(curl -s https://api.ipify.org)
 if [ -z "$PUBLIC_IP" ]; then
     echo "Error: Could not fetch public IP"
     exit 1
 fi
 
-echo "Starting Besu node with public IP: $PUBLIC_IP"
+echo "Starting Besu node with bootnode: $ENODE_URL and public IP: $PUBLIC_IP"
 
-# Display this node's enode 
-if [ -f "DVRE-Node/node.enode" ]; then
-    echo "This node's enode:"
-    cat DVRE-Node/node.enode
-    echo ""
+# Check if genesis.json exists
+if [ ! -f "DVRE-Node/genesis.json" ]; then
+    echo "Warning: genesis.json not found in DVRE-Node directory"
+    echo "Make sure genesis.json is present before starting the node"
+    exit 1
 fi
 
-# Create docker-compose.yml with the provided bootstrap enode
+# Create docker-compose.yml with the provided enode URL
 cat > docker-compose.yml << EOF
 services:
   besu-node:
     image: hyperledger/besu:latest
     container_name: besu-node
     ports:
-      - "8546:8546"      # WebSocket JSON-RPC
-      - "8550:8550"      # HTTP JSON-RPC
-      - "30310:30310/tcp"  # P2P TCP
-      - "30310:30310/udp"  # P2P UDP
-      - "30303:30303"      # Bootnode port
+      - "8550:8550"    # JSON-RPC port
+      - "8546:8546"           # JSON-RPC WebSocket
+      - "8546:8546"           # JSON-RPC WebSocket
+      - "30310:30310/tcp"  # P2P port
+      - "30310:30310/udp"  # P2P port
+      - "30303:30303"  # Bootnode port
     volumes:
       - ./DVRE-Node/data:/opt/besu/data
       - ./DVRE-Node/genesis.json:/opt/besu/genesis.json
     command: >
       --data-path=/opt/besu/data
       --genesis-file=/opt/besu/genesis.json
-      --bootnodes=$BOOTSTRAP_ENODE
+      --bootnodes=$ENODE_URL
       --p2p-port=30310
       --rpc-http-port=8550
       --p2p-host=$PUBLIC_IP
       --rpc-http-host=0.0.0.0
       --rpc-http-enabled
-      --rpc-http-api=ETH,NET,IBFT,ADMIN,DEBUG,TXPOOL,WEB3
+      --rpc-http-api=ETH,NET,IBFT
       --rpc-ws-enabled
       --rpc-ws-host=0.0.0.0
       --rpc-ws-port=8546
-      --rpc-ws-api=ETH,NET,WEB3,ADMIN,DEBUG,TXPOOL
+      --rpc-ws-api=ETH,NET,IBFT,WEB3
       --host-allowlist="*"
       --rpc-http-cors-origins="all"
       --profile=ENTERPRISE
       --min-gas-price=0
-
+ 
 EOF
 
-echo "Docker Compose file created with bootstrap node: $BOOTSTRAP_ENODE"
+echo "Docker Compose file created with bootnode: $ENODE_URL"
 
 # Stop any existing containers
 echo "Stopping any existing Besu containers..."
 docker compose down 2>/dev/null || true
 
-# Start the node
-echo "Starting Besu node in detached mode..."
-echo "RPC endpoint will be available at: http://$PUBLIC_IP:8550"
-echo "WebSocket endpoint will be available at: ws://$PUBLIC_IP:8546"
-
-docker compose up -d
-
-echo "Node started successfully!"
-echo "Check status with: docker logs besu-node"
+# Start the services
+echo "Starting Besu node..."
+docker compose upduong@dvre02:~/besu-deployment$ 
