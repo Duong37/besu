@@ -70,3 +70,4 @@ docker compose down 2>/dev/null || true
 
 # Start the services
 echo "Starting Besu node..."
+docker compose up -d
